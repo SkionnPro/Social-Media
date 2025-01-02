@@ -1,7 +1,11 @@
 package com.anshum.Social.Media.Controller;
 
+import com.anshum.Social.Media.DTO.PostDTO;
+import com.anshum.Social.Media.DTO.PostResponseDTO;
 import com.anshum.Social.Media.Model.Post;
+import com.anshum.Social.Media.Model.User;
 import com.anshum.Social.Media.Service.PostService;
+import com.anshum.Social.Media.Service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,10 +19,29 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/posts")
 @RequiredArgsConstructor
 public class PostController {
-    private PostService service;
+    private final PostService postService;
+    private final UserService userService;
 
     @PostMapping("/create")
-    public ResponseEntity<Post> createPost(@Validated @RequestBody Post post){
-        return new ResponseEntity<>(service.createPost(post), HttpStatus.OK);
+    public ResponseEntity<PostResponseDTO> createPost(@Validated @RequestBody PostDTO postDTO){
+        try{
+            User user = userService.getUserById(postDTO.getUserId());
+            Post post = new Post();
+            post.setContent(postDTO.getContent());
+            post.setUser(user);
+
+            Post createdPost = postService.createPost(post);
+
+            PostResponseDTO response = new PostResponseDTO();
+            response.setId(createdPost.getId());
+            response.setContent(createdPost.getContent());
+            response.setUsername(createdPost.getUser().getUsername());
+            response.setDateTime(createdPost.getDateTime());
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        }catch (RuntimeException e){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+        }
+
     }
 }
