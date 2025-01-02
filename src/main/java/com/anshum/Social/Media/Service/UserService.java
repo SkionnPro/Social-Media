@@ -24,4 +24,12 @@ public class UserService {
         return repo.findById(id)
                 .orElseThrow(() -> new RuntimeException("user not found with id : " + id));
     }
+
+    public User loginUser(String username, String password) {
+        User user = repo.findByUsername(username);
+
+        if(user != null && password == user.getPassword())
+            return user;
+        return null;
+    }
 }

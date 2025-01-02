@@ -6,6 +6,7 @@ import com.anshum.Social.Media.Model.Post;
 import com.anshum.Social.Media.Model.User;
 import com.anshum.Social.Media.Service.PostService;
 import com.anshum.Social.Media.Service.UserService;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,8 +23,23 @@ public class PostController {
     private final PostService postService;
     private final UserService userService;
 
+    private User checkLoggedInUser(HttpSession session){
+        Object userId = session.getId();
+        if(userId != null){
+            return userService.getUserById((Long) userId);
+        }
+        return null;
+    }
+
     @PostMapping("/create")
-    public ResponseEntity<PostResponseDTO> createPost(@Validated @RequestBody PostDTO postDTO){
+    public ResponseEntity<?> createPost(@Validated @RequestBody PostDTO postDTO, HttpSession session){
+
+        User loginCheck = checkLoggedInUser(session);
+
+        if(loginCheck == null){
+            return new ResponseEntity<>("User not logged in", HttpStatus.UNAUTHORIZED);
+        }
+
         try{
             User user = userService.getUserById(postDTO.getUserId());
             Post post = new Post();
