@@ -3,11 +3,10 @@ package com.anshum.Social.Media.Controller;
 import com.anshum.Social.Media.DTO.LoginDTO;
 import com.anshum.Social.Media.DTO.UserDTO;
 import com.anshum.Social.Media.DTO.UserResponseDTO;
-import com.anshum.Social.Media.Model.User;
+import com.anshum.Social.Media.Model.UserTable;
 import com.anshum.Social.Media.Service.UserService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.validator.constraints.ParameterScriptAssert;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -22,17 +21,17 @@ public class UserController {
     @PostMapping("/register")
     public ResponseEntity<UserResponseDTO> registerUser(@Validated @RequestBody UserDTO userDTO){
         try{
-            User user = new User();
-            user.setUsername(userDTO.getUsername());
-            user.setEmail(userDTO.getEmail());
-            user.setPassword(userDTO.getPassword());
+            UserTable userTable = new UserTable();
+            userTable.setUsername(userDTO.getUsername());
+            userTable.setEmail(userDTO.getEmail());
+            userTable.setPassword(userDTO.getPassword());
 
-            User createdUser = service.createUser(user);
+            UserTable createdUserTable = service.createUser(userTable);
 
             UserResponseDTO response = new UserResponseDTO();
-            response.setId(createdUser.getId());
-            response.setUsername(createdUser.getUsername());
-            response.setEmail(createdUser.getEmail());
+            response.setId(createdUserTable.getId());
+            response.setUsername(createdUserTable.getUsername());
+            response.setEmail(createdUserTable.getEmail());
 
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }catch(RuntimeException e){
@@ -42,12 +41,12 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody LoginDTO loginDTO,HttpSession session){
-        User user = service.loginUser(loginDTO.getUsername(), loginDTO.getPassword());
+        UserTable userTable = service.loginUser(loginDTO.getUsername(), loginDTO.getPassword());
 
-        if(user == null)
+        if(userTable == null)
             return new ResponseEntity<>("Invalid Credentials...", HttpStatus.UNAUTHORIZED);
 
-        session.setAttribute("UserId", user.getId());
+        session.setAttribute("UserId", userTable.getId());
         return new ResponseEntity<>("Login Successful...", HttpStatus.OK);
     }
 
